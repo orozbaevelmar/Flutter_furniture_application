@@ -17,14 +17,22 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _numberController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
-  final List<TextEditingController>? materialController = [];
+  List<TextEditingController>? _materialAndColorController = [
+    TextEditingController()
+  ];
+  List<TextEditingController>? _quantityPerProductController = [
+    TextEditingController()
+  ];
+  List<TextEditingController>? _unitMeasurementController = [
+    TextEditingController()
+  ];
 
-  final TextEditingController _materialAndColorController =
+  /* final TextEditingController _materialAndColorController =
       TextEditingController();
   final TextEditingController _quantityPerProductController =
       TextEditingController();
   final TextEditingController _unitMeasurementController =
-      TextEditingController();
+      TextEditingController(); */
 
   final TextEditingController _showMaterialAndColorController =
       TextEditingController();
@@ -70,10 +78,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return controller.text.isEmpty ? Colors.transparent : Color(0xffD2D2D2);
   }
 
-  bool _filledAllMaterialControllersAbove() {
-    return _materialAndColorController.text.isNotEmpty &&
-        _quantityPerProductController.text.isNotEmpty &&
-        _unitMeasurementController.text.isNotEmpty;
+  bool _filledAllMaterialControllersAbove(int index) {
+    return _materialAndColorController![index].text.isNotEmpty &&
+        _quantityPerProductController![index].text.isNotEmpty &&
+        _unitMeasurementController![index].text.isNotEmpty;
   }
 
   bool filledAllFurnitureControllersAbove() {
@@ -88,9 +96,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _checkAndSave() {
     return _numberController.text.isNotEmpty &&
-        _materialAndColorController.text.isNotEmpty &&
-        _quantityPerProductController.text.isNotEmpty &&
-        _unitMeasurementController.text.isNotEmpty &&
+        _materialAndColorController![_clickedMaterialButton - 1]
+            .text
+            .isNotEmpty &&
+        _quantityPerProductController![_clickedMaterialButton - 1]
+            .text
+            .isNotEmpty &&
+        _unitMeasurementController![_clickedMaterialButton - 1]
+            .text
+            .isNotEmpty &&
         _furnitureAndColorController.text.isNotEmpty &&
         _furnitureQuantityPerProductController.text.isNotEmpty &&
         _furnitureUnitMeasurementController.text.isNotEmpty;
@@ -312,7 +326,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? _buildMaterialListView()
                   : Container(),
 
-              //SizedBox(height: 564 - 506 - 50),
               _materialButton(),
               SizedBox(height: 564 - 506 - 50),
               //MyWidget(),
@@ -340,19 +353,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildMaterialListView() {
     return ListView.builder(
+      physics: NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
       shrinkWrap: true,
       itemCount: _clickedMaterialButton,
       itemBuilder: (context, index) {
+        _materialAndColorController?.add(TextEditingController());
+        _quantityPerProductController?.add(TextEditingController());
+        _unitMeasurementController?.add(TextEditingController());
         return Column(
           children: [
             //SizedBox(height: 564 - 506 - 50),
-            _materialAndColor(),
+            _materialAndColor(index),
             SizedBox(height: 506 - 448 - 50),
             Row(children: [
-              _quantityPerProduct(),
+              _quantityPerProduct(index),
               SizedBox(width: 7),
-              _unitMeasurement(),
+              _unitMeasurement(index),
             ]),
+            SizedBox(height: 564 - 506 - 50),
           ],
         );
       },
@@ -438,7 +457,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _materialAndColor() {
+  Widget _materialAndColor(int index) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -447,9 +466,10 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 340,
           padding: EdgeInsets.symmetric(horizontal: 15),
           decoration: BoxDecoration(
-            color: _colorMaterialAndColor,
+            color: _changeColor(_materialAndColorController![index]),
             border: Border.all(
-                color: _changeBorderColor(_materialAndColorController)),
+              color: _changeBorderColor(_materialAndColorController![index]),
+            ),
             borderRadius: BorderRadius.circular(15),
           ),
           child: TextField(
@@ -460,14 +480,11 @@ class _HomeScreenState extends State<HomeScreen> {
               labelText: 'Материал, цвет',
               border: InputBorder.none,
             ),
-            controller: _materialAndColorController,
+            controller: _materialAndColorController![index],
             onTapOutside: (event) =>
                 FocusManager.instance.primaryFocus?.unfocus(),
             onChanged: (value) {
-              setState(() {
-                _colorMaterialAndColor =
-                    _changeColor(_materialAndColorController);
-              });
+              setState(() {});
             },
           ),
         ),
@@ -475,13 +492,13 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 50,
           width: 50,
           decoration: BoxDecoration(
-            color: _materialAndColorController.text.isEmpty
-                ? Color(0xffCCCCCC)
-                : Colors.white,
+            color: _filledAllMaterialControllersAbove(index)
+                ? Colors.white
+                : Color(0xffCCCCCC),
             border: Border.all(
-              color: _materialAndColorController.text.isEmpty
-                  ? Color(0xfff0f0f0)
-                  : Color(0xff47A6DC),
+              color: _filledAllMaterialControllersAbove(index)
+                  ? Color(0xff47A6DC)
+                  : Color(0xfff0f0f0),
             ),
             shape: BoxShape.circle,
           ),
@@ -493,17 +510,22 @@ class _HomeScreenState extends State<HomeScreen> {
               setState(() {
                 /* _colorMaterialAndColor =
                     _changeColor(_materialAndColorController); */
-                _materialAndColorController.clear();
-                _quantityPerProductController.clear();
-                _unitMeasurementController.clear();
-                if (_clickedMaterialButton > 1) _clickedMaterialButton--;
+                _materialAndColorController![index].clear();
+                _quantityPerProductController![index].clear();
+                _unitMeasurementController![index].clear();
+                if (_clickedMaterialButton > 1) {
+                  _clickedMaterialButton--;
+                  _materialAndColorController!.removeLast();
+                  _quantityPerProductController!.removeLast();
+                  _unitMeasurementController!.removeLast();
+                }
               });
             },
             icon: Icon(
               Icons.clear,
-              color: _materialAndColorController.text.isEmpty
-                  ? Colors.white
-                  : Color(0xff47A6DC),
+              color: _filledAllMaterialControllersAbove(index)
+                  ? Color(0xff47A6DC)
+                  : Colors.white,
             ),
           ),
         ),
@@ -511,15 +533,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _quantityPerProduct() {
+  Widget _quantityPerProduct(int index) {
     return Expanded(
       child: Container(
         height: 50,
         padding: EdgeInsets.symmetric(horizontal: 15),
         decoration: BoxDecoration(
-          color: _colorQuantityPerProduct,
+          color: _changeColor(_quantityPerProductController![index]),
           border: Border.all(
-              color: _changeBorderColor(_quantityPerProductController)),
+              color: _changeBorderColor(_quantityPerProductController![index])),
           borderRadius: BorderRadius.circular(15),
         ),
         child: TextField(
@@ -530,29 +552,26 @@ class _HomeScreenState extends State<HomeScreen> {
             labelText: 'Кол-во на ед. прод. ',
             border: InputBorder.none,
           ),
-          controller: _quantityPerProductController,
+          controller: _quantityPerProductController![index],
           onTapOutside: (event) =>
               FocusManager.instance.primaryFocus?.unfocus(),
           onChanged: (value) {
-            setState(() {
-              _colorQuantityPerProduct =
-                  _changeColor(_quantityPerProductController);
-            });
+            setState(() {});
           },
         ),
       ),
     );
   }
 
-  Widget _unitMeasurement() {
+  Widget _unitMeasurement(int index) {
     return Expanded(
       child: Container(
         height: 50,
         padding: EdgeInsets.symmetric(horizontal: 15),
         decoration: BoxDecoration(
-          color: _colorUnitMeasurement,
-          border:
-              Border.all(color: _changeBorderColor(_unitMeasurementController)),
+          color: _changeColor(_unitMeasurementController![index]),
+          border: Border.all(
+              color: _changeBorderColor(_unitMeasurementController![index])),
           borderRadius: BorderRadius.circular(15),
         ),
         child: TextField(
@@ -563,13 +582,11 @@ class _HomeScreenState extends State<HomeScreen> {
             labelText: 'Ед. измерения',
             border: InputBorder.none,
           ),
-          controller: _unitMeasurementController,
+          controller: _unitMeasurementController![index],
           onTapOutside: (event) =>
               FocusManager.instance.primaryFocus?.unfocus(),
           onChanged: (value) {
-            setState(() {
-              _colorUnitMeasurement = _changeColor(_unitMeasurementController);
-            });
+            setState(() {});
           },
         ),
       ),
@@ -582,14 +599,14 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 50,
       width: 195,
       decoration: BoxDecoration(
-        color: _filledAllMaterialControllersAbove()
+        color: _filledAllMaterialControllersAbove(_clickedMaterialButton - 1)
             ? Color(0xff47A6DC)
             : Color(0xffCCCCCC),
         borderRadius: BorderRadius.circular(15),
       ),
       child: TextButton(
         onPressed: () {
-          if (_filledAllMaterialControllersAbove()) {
+          if (_filledAllMaterialControllersAbove(_clickedMaterialButton - 1)) {
             setState(() {
               _clickedMaterialButton++;
             });
