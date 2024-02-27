@@ -102,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
     /* String url2 = 'https://intern.salamhalal.info/api/article_item';
     String url3 = 'https://intern.salamhalal.info/api/item'; */
 
-    // Подготовка данных для отправки
+    
     var data1 = {
       'number': _numberController.text,
       'description': _descriptionController.text,
@@ -120,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'measurement': _furnitureUnitMeasurementController.text,
     }; */
 
-    // Отправка POST запроса
+    
     var response1 = await http.post(
       Uri.parse(url1), body: json.encode(data1),
       headers: {"Content-Type": "application/json"},
@@ -136,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ); */
     print("${response1.statusCode}");
     print("${response1.body}");
-    // Проверка успешности запроса
+   
     if (response1.statusCode == 201) {
       print('1 Данные успешно добавлены');
     } else {
@@ -162,10 +162,10 @@ class _HomeScreenState extends State<HomeScreen> {
   var url3 = 'https://intern.salamhalal.info/api/item'; */
 
   /* Future<void> postData() async {
-    // Замените URL на URL вашего REST API
+    
     // String url = 'https://intern.salamhalal.info/api/article/';
 
-    // Создайте данные для отправки
+    
     Map<String, dynamic> data1 = {
       'number': 'gfdgdf',
       'description': 'gfdgdfsghdf'
