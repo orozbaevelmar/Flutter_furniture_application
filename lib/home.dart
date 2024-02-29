@@ -23,9 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<TextEditingController>? _quantityPerProductController = [
     TextEditingController()
   ];
-  List<TextEditingController>? _unitMeasurementController = [
-    TextEditingController()
-  ];
+  List<String?>? _unitMeasurementController = [null];
 
   /* final TextEditingController _materialAndColorController =
       TextEditingController();
@@ -34,33 +32,17 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _unitMeasurementController =
       TextEditingController(); */
 
-  final TextEditingController _showMaterialAndColorController =
-      TextEditingController();
-  // _materialAndColorController _quantityPerProductController _unitMeasurementController
-
-  //
-  final TextEditingController _quantityPerProductController2 =
-      TextEditingController();
-  final TextEditingController _unitMeasurementController2 =
-      TextEditingController();
-
   //furniture
   //_furnitureAndColorController _furnitureQuantityPerProductController _furnitureUnitMeasurementController
   final TextEditingController _furnitureAndColorController =
       TextEditingController();
   final TextEditingController _furnitureQuantityPerProductController =
       TextEditingController();
-  final TextEditingController _furnitureUnitMeasurementController =
-      TextEditingController();
+  String? _strFurnitureUnitMeasurement;
 
   // Color ---------------------------------------------------------------------
   Color _colorNumberArticul = Color(0xfff0f0f0);
   Color _colorDescriptionArticul = Color(0xfff0f0f0);
-  Color _colorShowMaterialAndColor = Color(0xfff0f0f0);
-
-  // 2  _colorQuantityPerProduct2  _colorUnitMeasurement2
-  Color _colorQuantityPerProduct2 = Color(0xfff0f0f0);
-  Color _colorUnitMeasurement2 = Color(0xfff0f0f0);
 
   // furniture
   Color _colorFurnitureMaterialAndColor = Color(0xfff0f0f0);
@@ -78,13 +60,13 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _filledAllMaterialControllersAbove(int index) {
     return _materialAndColorController![index].text.isNotEmpty &&
         _quantityPerProductController![index].text.isNotEmpty &&
-        _unitMeasurementController![index].text.isNotEmpty;
+        _notEmptyString(_unitMeasurementController![index]);
   }
 
   bool filledAllFurnitureControllersAbove() {
     return _furnitureAndColorController.text.isNotEmpty &&
         _furnitureQuantityPerProductController.text.isNotEmpty &&
-        _furnitureUnitMeasurementController.text.isNotEmpty;
+        _notEmptyString(_strFurnitureUnitMeasurement);
   }
 
   // Should be always more than 1, because it will build ListView
@@ -99,12 +81,11 @@ class _HomeScreenState extends State<HomeScreen> {
         _quantityPerProductController![_clickedMaterialButton - 1]
             .text
             .isNotEmpty &&
-        _unitMeasurementController![_clickedMaterialButton - 1]
-            .text
-            .isNotEmpty &&
+        _notEmptyString(
+            _unitMeasurementController?[_clickedMaterialButton - 1]) &&
         _furnitureAndColorController.text.isNotEmpty &&
         _furnitureQuantityPerProductController.text.isNotEmpty &&
-        _furnitureUnitMeasurementController.text.isNotEmpty;
+        _notEmptyString(_strFurnitureUnitMeasurement);
   }
 
   /* Future<void> _postData() async {
@@ -236,8 +217,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   } */
 
-  String? str;
-
   Future<void> postData1() async {
     // var url1 = '';
     Map<String, dynamic> data = {
@@ -269,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Map<String, dynamic> data2 = {
       'quantity': int.parse(_quantityPerProductController![index].text),
       'article': int.parse(_materialAndColorController![index].text),
-      'item': int.parse(_unitMeasurementController![index].text),
+      'item': int.parse(_unitMeasurementController![index] ?? '0'),
     };
 
     try {
@@ -294,16 +273,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> postData3() async {
     var url3 = 'https://intern.salamhalal.info/api/item/';
 
-    var _meashurementArr = [
-      _furnitureQuantityPerProductController.text,
-      'accessoires',
-    ];
     Map<String, dynamic> data3 = {
       'name': _furnitureAndColorController.text,
-      'item_type': 'material',
-      'measurement': 'метр',
+      'item_type': _strFurnitureUnitMeasurement,
+      'measurement': int.parse(_furnitureQuantityPerProductController.text),
     };
     try {
+      print(_furnitureAndColorController.text);
+      print(_strFurnitureUnitMeasurement);
+      print(_furnitureQuantityPerProductController.text);
       final response3 = await http.post(
         Uri.parse(url3),
         headers: <String, String>{
@@ -322,19 +300,23 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Color _changeColorForString(String? str) {
+    return (str?.isEmpty ?? true) ? Color(0xfff0f0f0) : Colors.white;
+  }
+
+  Color _changeBorderColorForString(String? str) {
+    return (str?.isEmpty ?? true) ? Colors.transparent : Color(0xffD2D2D2);
+  }
+
   bool _emptyString(String? str) {
     return str?.isEmpty ?? true;
   }
 
-  String? selectedType;
-
-  late GlobalKey dropdownKey;
-
-  @override
-  void initState() {
-    super.initState();
-    dropdownKey = GlobalKey();
+  bool _notEmptyString(String? str) {
+    return str?.isNotEmpty ?? false;
   }
+
+  String? selectedType;
 
   @override
   Widget build(BuildContext context) {
@@ -363,43 +345,18 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             children: [
               _myButton(),
-              //_dropDownBut(),
+
+              // Info About Articul
               _infoArticul(),
               _numberArticul(),
               SizedBox(height: 216 - 158 - 50),
               _descriptionArticul(),
+
+              // Material
               _materialText(),
-              /* _materialAndColor(),
-              SizedBox(height: 506 - 448 - 50),
-              Row(children: [
-                _quantityPerProduct(),
-                SizedBox(width: 7),
-                _unitMeasurement(),
-              ]), */
-
-              /* // Material Button
-              _clickedMaterialButton > 0
-                  ? Column(
-                      children: [
-                        SizedBox(height: 564 - 506 - 50),
-                        _showMaterialAndColor(),
-                        SizedBox(height: 622 - 564 - 50),
-                        Row(children: [
-                          _quantityPerProduct2(),
-                          SizedBox(width: 7),
-                          _unitMeasurement2(),
-                        ]),
-                      ],
-                    )
-                  : Container(), */
-
-              _clickedMaterialButton > 0
-                  ? _buildMaterialListView()
-                  : Container(),
-
+              _buildMaterialListView(),
               _materialButton(),
               SizedBox(height: 564 - 506 - 50),
-              //MyWidget(),
 
               // furniture
               _furnitureText(),
@@ -413,41 +370,14 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: 796 - 738 - 50),
               _furnitureButton(),
               SizedBox(height: 912 - 796 - 50),
+
+              // Save
               _saveButton(),
-              SizedBox(height: 50),
-              _buildDropDownMenu(),
               SizedBox(height: 50),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildMaterialListView() {
-    return ListView.builder(
-      physics: NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      shrinkWrap: true,
-      itemCount: _clickedMaterialButton,
-      itemBuilder: (context, index) {
-        _materialAndColorController?.add(TextEditingController());
-        _quantityPerProductController?.add(TextEditingController());
-        _unitMeasurementController?.add(TextEditingController());
-        return Column(
-          children: [
-            //SizedBox(height: 564 - 506 - 50),
-            _materialAndColor(index),
-            SizedBox(height: 506 - 448 - 50),
-            Row(children: [
-              _quantityPerProduct(index),
-              SizedBox(width: 7),
-              _unitMeasurement(index),
-            ]),
-            SizedBox(height: 564 - 506 - 50),
-          ],
-        );
-      },
     );
   }
 
@@ -530,6 +460,33 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildMaterialListView() {
+    return ListView.builder(
+      physics: NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      itemCount: _clickedMaterialButton,
+      itemBuilder: (context, index) {
+        _materialAndColorController?.add(TextEditingController());
+        _quantityPerProductController?.add(TextEditingController());
+        _unitMeasurementController?.add(null);
+        return Column(
+          children: [
+            //SizedBox(height: 564 - 506 - 50),
+            _materialAndColor(index),
+            SizedBox(height: 506 - 448 - 50),
+            Row(children: [
+              _quantityPerProduct(index),
+              SizedBox(width: 7),
+              _unitMeasurement(index),
+            ]),
+            SizedBox(height: 564 - 506 - 50),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _materialAndColor(int index) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -565,11 +522,11 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 50,
           width: 50,
           decoration: BoxDecoration(
-            color: _filledAllMaterialControllersAbove(index)
+            color: _filledAllMaterialControllersAbove(0)
                 ? Colors.white
                 : Color(0xffCCCCCC),
             border: Border.all(
-              color: _filledAllMaterialControllersAbove(index)
+              color: _filledAllMaterialControllersAbove(0)
                   ? Color(0xff47A6DC)
                   : Color(0xfff0f0f0),
             ),
@@ -585,7 +542,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     _changeColor(_materialAndColorController); */
                 _materialAndColorController![index].clear();
                 _quantityPerProductController![index].clear();
-                _unitMeasurementController![index].clear();
+                //_unitMeasurementController!.removeLast();
+                //_unitMeasurementController!.add(null);
+
+                //_unitMeasurementController![index]!.replaceRange(0, null, '');
                 if (_clickedMaterialButton > 1) {
                   _clickedMaterialButton--;
                   _materialAndColorController!.removeLast();
@@ -596,7 +556,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: Icon(
               Icons.clear,
-              color: _filledAllMaterialControllersAbove(index)
+              color: _filledAllMaterialControllersAbove(0)
                   ? Color(0xff47A6DC)
                   : Colors.white,
             ),
@@ -636,34 +596,78 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _unitMeasurement1(int index) {
+  Widget _unitMeasurement(int idx) {
+    // str, _unitMeasurementController0
+    final List<String> places = ['1', '2', '3'];
+    final List<String> placesRu = ['метр', 'рулон', 'штук'];
+
     return Expanded(
       child: Container(
         height: 50,
         padding: EdgeInsets.symmetric(horizontal: 15),
         decoration: BoxDecoration(
-          color: _changeColor(_unitMeasurementController![index]),
-          border: Border.all(
-              color: _changeBorderColor(_unitMeasurementController![index])),
+            color: _changeColorForString(_unitMeasurementController![idx]),
+            border: Border.all(
+                color: _changeBorderColorForString(
+                    _unitMeasurementController![idx])),
+            borderRadius: BorderRadius.circular(15)),
+        child: DropdownButtonFormField<String>(
+          dropdownColor: Colors.black,
           borderRadius: BorderRadius.circular(15),
-        ),
-        child: TextField(
-          cursorHeight: 14,
-          style: TextStyle(fontSize: 16),
           decoration: InputDecoration(
-            labelStyle: TextStyle(fontSize: 10),
+            contentPadding:
+                EdgeInsets.only(left: 0, right: 0, top: 9, bottom: 9),
             labelText: 'Ед. измерения (type: int)',
+            labelStyle: TextStyle(fontSize: 10),
             border: InputBorder.none,
           ),
-          controller: _unitMeasurementController![index],
-          onTapOutside: (event) =>
-              FocusManager.instance.primaryFocus?.unfocus(),
-          onChanged: (value) {
-            setState(() {});
+          selectedItemBuilder: (_) {
+            return placesRu
+                .map((e) => Text(
+                      e,
+                      /* // _unitMeasurementController![idx]
+                      _notEmptyString(_unitMeasurementController![idx])
+                          ? e
+                          : '', */
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black,
+                        fontSize: 16,
+                        height: 0,
+                      ),
+                    ))
+                .toList();
+          },
+          value: _unitMeasurementController![idx],
+          icon: Icon(Icons.arrow_drop_down),
+          items: places.mapIndexed((int index, String value) {
+            return DropdownMenuItem<String>(
+              value: placesRu[index],
+              child: Text(
+                placesRu[index],
+                style: TextStyle(
+                  color: Colors.white,
+                  height: 0,
+                  fontSize: 16,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: (_newValue) {
+            setState(() {
+              _unitMeasurementController![idx] = _newValue;
+            });
           },
         ),
       ),
     );
+    /* IconButton(
+          icon: Image.asset('assets/Dropdown_arrow.png'),
+          color: Color(0xffFFFFFF),
+          onPressed: () {
+            //Navigator.pop(dropdownKey.currentContext!);
+          },
+       ), */
   }
 
   Widget _materialButton() {
@@ -688,136 +692,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Text(
           '+ материал',
           style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
-        ),
-      ),
-    );
-  }
-
-  //_showMaterialAndColorColor _showMaterialAndColorController
-
-  Widget _showMaterialAndColor() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Container(
-          height: 50,
-          width: 340,
-          padding: EdgeInsets.symmetric(horizontal: 15),
-          decoration: BoxDecoration(
-            color: _colorShowMaterialAndColor,
-            border: Border.all(
-                color: _changeBorderColor(_showMaterialAndColorController)),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: TextField(
-            cursorHeight: 14,
-            style: TextStyle(fontSize: 16),
-            decoration: InputDecoration(
-              labelStyle: TextStyle(fontSize: 10),
-              labelText: 'Материал, цвет',
-              border: InputBorder.none,
-            ),
-            controller: _showMaterialAndColorController,
-            onTapOutside: (event) =>
-                FocusManager.instance.primaryFocus?.unfocus(),
-            onChanged: (value) {
-              setState(() {
-                _colorShowMaterialAndColor =
-                    _changeColor(_showMaterialAndColorController);
-              });
-            },
-          ),
-        ),
-        Container(
-          height: 50,
-          width: 50,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(
-              color: Color(0xff47A6DC),
-            ),
-            shape: BoxShape.circle,
-          ),
-          child: IconButton(
-            onPressed: () {
-              setState(() {
-                _clickedMaterialButton--;
-              });
-            },
-            icon: Icon(
-              Icons.clear,
-              color: Color(0xff47A6DC),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _quantityPerProduct2() {
-    return Expanded(
-      child: Container(
-        height: 50,
-        padding: EdgeInsets.symmetric(horizontal: 15),
-        decoration: BoxDecoration(
-          color: _colorQuantityPerProduct2,
-          border: Border.all(
-              color: _changeBorderColor(_quantityPerProductController2)),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: TextField(
-          cursorHeight: 14,
-          style: TextStyle(fontSize: 16),
-          decoration: InputDecoration(
-            labelStyle: TextStyle(fontSize: 10),
-            labelText: 'Кол-во на ед. прод. ',
-            border: InputBorder.none,
-          ),
-          controller: _quantityPerProductController2,
-          onTapOutside: (event) =>
-              FocusManager.instance.primaryFocus?.unfocus(),
-          onChanged: (value) {
-            setState(() {
-              _colorQuantityPerProduct2 =
-                  _changeColor(_quantityPerProductController2);
-            });
-          },
-        ),
-      ),
-    );
-  }
-
-  // _quantityPerProductController2 _unitMeasurement2Controller2
-  // _colorQuantityPerProduct2  _colorUnitMeasurement2
-
-  Widget _unitMeasurement2() {
-    return Expanded(
-      child: Container(
-        height: 50,
-        padding: EdgeInsets.symmetric(horizontal: 15),
-        decoration: BoxDecoration(
-          color: _colorUnitMeasurement2,
-          border: Border.all(
-              color: _changeBorderColor(_unitMeasurementController2)),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: TextField(
-          cursorHeight: 14,
-          style: TextStyle(fontSize: 16),
-          decoration: InputDecoration(
-            labelStyle: TextStyle(fontSize: 10),
-            labelText: 'Ед. измерения',
-            border: InputBorder.none,
-          ),
-          controller: _unitMeasurementController2,
-          onTapOutside: (event) =>
-              FocusManager.instance.primaryFocus?.unfocus(),
-          onChanged: (value) {
-            setState(() {
-              _colorUnitMeasurement2 =
-                  _changeColor(_unitMeasurementController2);
-            });
-          },
         ),
       ),
     );
@@ -920,7 +794,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontSize: 16),
           decoration: InputDecoration(
             labelStyle: TextStyle(fontSize: 10),
-            labelText: 'Кол-во на ед. прод. (type: String)',
+            labelText: 'Кол-во на ед. прод. (type: int)',
             border: InputBorder.none,
           ),
           controller: _furnitureQuantityPerProductController,
@@ -938,18 +812,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _furnitureUnitMeasurement() {
-    // str,
-    final List<String> places = ['material', 'accessoires'];
+    // _strFurnitureUnitMeasurement,
+    final List<String> places = ['material', 'accessories'];
     final List<String> placesRu = ['Материал', 'Аксессуары'];
     return Expanded(
       child: Container(
         height: 50,
         padding: EdgeInsets.symmetric(horizontal: 15),
         decoration: BoxDecoration(
-            color: _emptyString(str) ? Color(0xfff0f0f0) : Colors.white,
+            color: _changeColorForString(
+                _strFurnitureUnitMeasurement), //_emptyString(_strFurnitureUnitMeasurement) ? Color(0xfff0f0f0) : Colors.white,
             border: Border.all(
-                color:
-                    _emptyString(str) ? Colors.transparent : Color(0xffD2D2D2)),
+                color: _changeBorderColorForString(_strFurnitureUnitMeasurement)
+                //_emptyString(_strFurnitureUnitMeasurement) ? Colors.transparent : Color(0xffD2D2D2)
+                ),
             borderRadius: BorderRadius.circular(15)),
         child: DropdownButtonFormField<String>(
           dropdownColor: Colors.black,
@@ -957,7 +833,7 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: InputDecoration(
             contentPadding:
                 EdgeInsets.only(left: 0, right: 0, top: 9, bottom: 9),
-            labelText: 'Ед. измерения (type: int)',
+            labelText: 'Ед. измерения (type: String)',
             labelStyle: TextStyle(fontSize: 10),
             border: InputBorder.none,
           ),
@@ -974,7 +850,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ))
                 .toList();
           },
-          value: str,
+          value: _strFurnitureUnitMeasurement,
           icon: Icon(Icons.arrow_drop_down),
           items: places.mapIndexed((int index, String value) {
             return DropdownMenuItem<String>(
@@ -991,40 +867,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }).toList(),
           onChanged: (_newValue) {
             setState(() {
-              str = _newValue;
-            });
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _furnitureUnitMeasurement1() {
-    return Expanded(
-      child: Container(
-        height: 50,
-        padding: EdgeInsets.symmetric(horizontal: 15),
-        decoration: BoxDecoration(
-          color: _colorFurnitureUnitMeasurement,
-          border: Border.all(
-              color: _changeBorderColor(_furnitureUnitMeasurementController)),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: TextField(
-          cursorHeight: 14,
-          style: TextStyle(fontSize: 16),
-          decoration: InputDecoration(
-            labelStyle: TextStyle(fontSize: 10),
-            labelText: 'Ед. измерения (Array<int>)',
-            border: InputBorder.none,
-          ),
-          controller: _furnitureUnitMeasurementController,
-          onTapOutside: (event) =>
-              FocusManager.instance.primaryFocus?.unfocus(),
-          onChanged: (value) {
-            setState(() {
-              _colorFurnitureUnitMeasurement =
-                  _changeColor(_furnitureUnitMeasurementController);
+              _strFurnitureUnitMeasurement = _newValue;
             });
           },
         ),
@@ -1098,217 +941,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Text(
           'Post',
           style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
-        ),
-      ),
-    );
-  }
-
-  Widget _myUnitMeasurement(int index) {
-    return Expanded(
-      child: Container(
-        height: 50,
-        padding: EdgeInsets.symmetric(horizontal: 15),
-        decoration: BoxDecoration(
-          color: _changeColor(_unitMeasurementController![index]),
-          border: Border.all(
-              color: _changeBorderColor(_unitMeasurementController![index])),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: TextField(
-          cursorHeight: 14,
-          style: TextStyle(fontSize: 16),
-          decoration: InputDecoration(
-            labelStyle: TextStyle(fontSize: 10),
-            labelText: 'Ед. измерения (type: int)',
-            border: InputBorder.none,
-          ),
-          controller: _unitMeasurementController![index],
-          onTapOutside: (event) =>
-              FocusManager.instance.primaryFocus?.unfocus(),
-          onChanged: (value) {
-            setState(() {});
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropDownMenu() {
-    final List<String> places = ['material', 'accessoires'];
-    final List<String> placesRu = ['Материал', 'Аксессуары'];
-
-    return Column(
-      children: <Widget>[
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 50,
-                color: Colors.green,
-              ),
-            ),
-            SizedBox(width: 7),
-            Expanded(
-              child: Container(
-                height: 50,
-                padding: EdgeInsets.symmetric(horizontal: 15),
-                decoration: BoxDecoration(
-                    color: _emptyString(str) ? Color(0xfff0f0f0) : Colors.white,
-                    border: Border.all(
-                        color: _emptyString(str)
-                            ? Colors.transparent
-                            : Color(0xffD2D2D2)),
-                    borderRadius: BorderRadius.circular(15)),
-                child: DropdownButtonFormField<String>(
-                  dropdownColor: Colors.black,
-                  borderRadius: BorderRadius.circular(15),
-                  decoration: InputDecoration(
-                    contentPadding:
-                        EdgeInsets.only(left: 0, right: 0, top: 9, bottom: 9),
-                    labelText: 'Тип',
-                    labelStyle: TextStyle(fontSize: 10),
-                    border: InputBorder.none,
-                  ),
-                  selectedItemBuilder: (_) {
-                    return placesRu
-                        .map((e) => Text(
-                              e,
-                              style: TextStyle(
-                                fontWeight: FontWeight.normal,
-                                color: Colors.black,
-                                fontSize: 16,
-                                height: 0,
-                              ),
-                            ))
-                        .toList();
-                  },
-                  value: str,
-                  icon: Icon(Icons.arrow_drop_down),
-                  items: places.mapIndexed((int index, String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        placesRu[index],
-                        style: TextStyle(
-                          color: Colors.white,
-                          height: 0,
-                          fontSize: 16,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (_newValue) {
-                    setState(() {
-                      str = _newValue;
-                    });
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-        /* IconButton(
-          icon: Image.asset('assets/Dropdown_arrow.png'),
-          color: Color(0xffFFFFFF),
-          onPressed: () {
-            //Navigator.pop(dropdownKey.currentContext!);
-          },
-        ), */
-
-        SizedBox(
-          height: 50,
-        )
-      ],
-    );
-  }
-
-  Widget _unitMeasurement(int index) {
-    // str,
-    final List<String> places = ['material', 'accessoires'];
-    final List<String> placesRu = ['Материал', 'Аксессуары'];
-    return Expanded(
-      child: Container(
-        height: 50,
-        padding: EdgeInsets.symmetric(horizontal: 15),
-        decoration: BoxDecoration(
-            color: _emptyString(str) ? Color(0xfff0f0f0) : Colors.white,
-            border: Border.all(
-                color:
-                    _emptyString(str) ? Colors.transparent : Color(0xffD2D2D2)),
-            borderRadius: BorderRadius.circular(15)),
-        child: DropdownButtonFormField<String>(
-          dropdownColor: Colors.black,
-          borderRadius: BorderRadius.circular(15),
-          decoration: InputDecoration(
-            contentPadding:
-                EdgeInsets.only(left: 0, right: 0, top: 9, bottom: 9),
-            labelText: 'Ед. измерения (type: int)',
-            labelStyle: TextStyle(fontSize: 10),
-            border: InputBorder.none,
-          ),
-          selectedItemBuilder: (_) {
-            return placesRu
-                .map((e) => Text(
-                      e,
-                      style: TextStyle(
-                        fontWeight: FontWeight.normal,
-                        color: Colors.black,
-                        fontSize: 16,
-                        height: 0,
-                      ),
-                    ))
-                .toList();
-          },
-          value: str,
-          icon: Icon(Icons.arrow_drop_down),
-          items: places.mapIndexed((int index, String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(
-                placesRu[index],
-                style: TextStyle(
-                  color: Colors.white,
-                  height: 0,
-                  fontSize: 16,
-                ),
-              ),
-            );
-          }).toList(),
-          onChanged: (_newValue) {
-            setState(() {
-              str = _newValue;
-            });
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _unitMeasurement3(int index) {
-    return Expanded(
-      child: Container(
-        height: 50,
-        padding: EdgeInsets.symmetric(horizontal: 15),
-        decoration: BoxDecoration(
-          color: _changeColor(_unitMeasurementController![index]),
-          border: Border.all(
-              color: _changeBorderColor(_unitMeasurementController![index])),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: TextField(
-          cursorHeight: 14,
-          style: TextStyle(fontSize: 16),
-          decoration: InputDecoration(
-            labelStyle: TextStyle(fontSize: 10),
-            labelText: 'Ед. измерения (type: int)',
-            border: InputBorder.none,
-          ),
-          controller: _unitMeasurementController![index],
-          onTapOutside: (event) =>
-              FocusManager.instance.primaryFocus?.unfocus(),
-          onChanged: (value) {
-            setState(() {});
-          },
         ),
       ),
     );
