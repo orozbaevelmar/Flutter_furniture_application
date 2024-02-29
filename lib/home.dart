@@ -1,7 +1,7 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:collection/collection.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -56,9 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
   // Color ---------------------------------------------------------------------
   Color _colorNumberArticul = Color(0xfff0f0f0);
   Color _colorDescriptionArticul = Color(0xfff0f0f0);
-  Color _colorMaterialAndColor = Color(0xfff0f0f0);
-  Color _colorQuantityPerProduct = Color(0xfff0f0f0);
-  Color _colorUnitMeasurement = Color(0xfff0f0f0);
   Color _colorShowMaterialAndColor = Color(0xfff0f0f0);
 
   // 2  _colorQuantityPerProduct2  _colorUnitMeasurement2
@@ -233,37 +230,110 @@ class _HomeScreenState extends State<HomeScreen> {
             'Ошибка при отправлении данных (Материал): ${response2.statusCode}');
         print(
             'Ошибка при отправлении данных (Фурнитура): ${response3.statusCode}'); */
-      }
+      }// 
     } catch (error) {
       print('Ошибка при выполнении запроса: $error');
     }
   } */
 
-  Future<void> postData1() async {
-    String url = 'https://intern.salamhalal.info/api/article';
+  String? str;
 
+  Future<void> postData1() async {
+    // var url1 = '';
     Map<String, dynamic> data = {
+      //'name': '',
       'number': _numberController.text,
       'description': _descriptionController.text,
     };
-
     try {
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse('https://intern.salamhalal.info/api/article/'),
         headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
+          'Content-Type': 'application/json',
         },
         body: jsonEncode(data),
       );
 
-      if (response.statusCode == 400) {
-        print('Успешно отправлено: ${response.body}');
+      if (response.statusCode == 201) {
+        print('Успешно отправлено(Информация об артикуле): ${response.body}');
       } else {
-        print('Ошибка: ${response.statusCode}');
+        print('Ошибка(Информация об артикуле): ${response.statusCode}');
       }
     } catch (error) {
-      print('Ошибка при выполнении запроса: $error');
+      print('Ошибка при выполнении запроса(Информация об артикуле): $error');
     }
+  }
+
+  Future<void> postData2(int index) async {
+    var url2 = 'https://intern.salamhalal.info/api/article_item/';
+    Map<String, dynamic> data2 = {
+      'quantity': int.parse(_quantityPerProductController![index].text),
+      'article': int.parse(_materialAndColorController![index].text),
+      'item': int.parse(_unitMeasurementController![index].text),
+    };
+
+    try {
+      final response2 = await http.post(
+        Uri.parse(url2),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(data2),
+      );
+
+      if (response2.statusCode == 201) {
+        print('Успешно отправлено(Материал): ${response2.body}');
+      } else {
+        print('Ошибка(Материал): ${response2.statusCode}');
+      }
+    } catch (error) {
+      print('Ошибка при выполнении запроса(Материал): $error');
+    }
+  }
+
+  Future<void> postData3() async {
+    var url3 = 'https://intern.salamhalal.info/api/item/';
+
+    var _meashurementArr = [
+      _furnitureQuantityPerProductController.text,
+      'accessoires',
+    ];
+    Map<String, dynamic> data3 = {
+      'name': _furnitureAndColorController.text,
+      'item_type': 'material',
+      'measurement': 'метр',
+    };
+    try {
+      final response3 = await http.post(
+        Uri.parse(url3),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(data3),
+      );
+
+      if (response3.statusCode == 201) {
+        print('Успешно отправлено(Фурнитура): ${response3.body}');
+      } else {
+        print('Ошибка(Фурнитура): ${response3.statusCode}');
+      }
+    } catch (error) {
+      print('Ошибка при выполнении запроса(Фурнитура): $error');
+    }
+  }
+
+  bool _emptyString(String? str) {
+    return str?.isEmpty ?? true;
+  }
+
+  String? selectedType;
+
+  late GlobalKey dropdownKey;
+
+  @override
+  void initState() {
+    super.initState();
+    dropdownKey = GlobalKey();
   }
 
   @override
@@ -292,6 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.symmetric(horizontal: 15),
           child: Column(
             children: [
+              _myButton(),
               //_dropDownBut(),
               _infoArticul(),
               _numberArticul(),
@@ -343,6 +414,8 @@ class _HomeScreenState extends State<HomeScreen> {
               _furnitureButton(),
               SizedBox(height: 912 - 796 - 50),
               _saveButton(),
+              SizedBox(height: 50),
+              _buildDropDownMenu(),
               SizedBox(height: 50),
             ],
           ),
@@ -403,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen> {
         style: TextStyle(fontSize: 16),
         decoration: InputDecoration(
           labelStyle: TextStyle(fontSize: 10),
-          labelText: 'Номер артикула',
+          labelText: 'Номер артикула (type: String)',
           border: InputBorder.none,
         ),
         controller: _numberController,
@@ -432,7 +505,7 @@ class _HomeScreenState extends State<HomeScreen> {
         style: TextStyle(fontSize: 16),
         decoration: InputDecoration(
           labelStyle: TextStyle(fontSize: 10),
-          labelText: 'Описание артикула',
+          labelText: 'Описание артикула (type:String)',
           border: InputBorder.none,
         ),
         controller: _descriptionController,
@@ -477,7 +550,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(fontSize: 16),
             decoration: InputDecoration(
               labelStyle: TextStyle(fontSize: 10),
-              labelText: 'Материал, цвет',
+              labelText: 'Материал, цвет (type: int)',
               border: InputBorder.none,
             ),
             controller: _materialAndColorController![index],
@@ -549,7 +622,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontSize: 16),
           decoration: InputDecoration(
             labelStyle: TextStyle(fontSize: 10),
-            labelText: 'Кол-во на ед. прод. ',
+            labelText: 'Кол-во на ед. прод. (type: int)',
             border: InputBorder.none,
           ),
           controller: _quantityPerProductController![index],
@@ -563,7 +636,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _unitMeasurement(int index) {
+  Widget _unitMeasurement1(int index) {
     return Expanded(
       child: Container(
         height: 50,
@@ -579,7 +652,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontSize: 16),
           decoration: InputDecoration(
             labelStyle: TextStyle(fontSize: 10),
-            labelText: 'Ед. измерения',
+            labelText: 'Ед. измерения (type: int)',
             border: InputBorder.none,
           ),
           controller: _unitMeasurementController![index],
@@ -780,7 +853,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(fontSize: 16),
             decoration: InputDecoration(
               labelStyle: TextStyle(fontSize: 10),
-              labelText: 'Материал, цвет',
+              labelText: 'Материал, цвет (type: String)',
               border: InputBorder.none,
             ),
             controller: _furnitureAndColorController,
@@ -847,7 +920,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontSize: 16),
           decoration: InputDecoration(
             labelStyle: TextStyle(fontSize: 10),
-            labelText: 'Кол-во на ед. прод. ',
+            labelText: 'Кол-во на ед. прод. (type: String)',
             border: InputBorder.none,
           ),
           controller: _furnitureQuantityPerProductController,
@@ -865,6 +938,68 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _furnitureUnitMeasurement() {
+    // str,
+    final List<String> places = ['material', 'accessoires'];
+    final List<String> placesRu = ['Материал', 'Аксессуары'];
+    return Expanded(
+      child: Container(
+        height: 50,
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        decoration: BoxDecoration(
+            color: _emptyString(str) ? Color(0xfff0f0f0) : Colors.white,
+            border: Border.all(
+                color:
+                    _emptyString(str) ? Colors.transparent : Color(0xffD2D2D2)),
+            borderRadius: BorderRadius.circular(15)),
+        child: DropdownButtonFormField<String>(
+          dropdownColor: Colors.black,
+          borderRadius: BorderRadius.circular(15),
+          decoration: InputDecoration(
+            contentPadding:
+                EdgeInsets.only(left: 0, right: 0, top: 9, bottom: 9),
+            labelText: 'Ед. измерения (type: int)',
+            labelStyle: TextStyle(fontSize: 10),
+            border: InputBorder.none,
+          ),
+          selectedItemBuilder: (_) {
+            return placesRu
+                .map((e) => Text(
+                      e,
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black,
+                        fontSize: 16,
+                        height: 0,
+                      ),
+                    ))
+                .toList();
+          },
+          value: str,
+          icon: Icon(Icons.arrow_drop_down),
+          items: places.mapIndexed((int index, String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                placesRu[index],
+                style: TextStyle(
+                  color: Colors.white,
+                  height: 0,
+                  fontSize: 16,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: (_newValue) {
+            setState(() {
+              str = _newValue;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _furnitureUnitMeasurement1() {
     return Expanded(
       child: Container(
         height: 50,
@@ -880,7 +1015,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontSize: 16),
           decoration: InputDecoration(
             labelStyle: TextStyle(fontSize: 10),
-            labelText: 'Ед. измерения',
+            labelText: 'Ед. измерения (Array<int>)',
             border: InputBorder.none,
           ),
           controller: _furnitureUnitMeasurementController,
@@ -940,6 +1075,240 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Text(
           'Сохранить',
           style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
+        ),
+      ),
+    );
+  }
+
+  Widget _myButton() {
+    return Container(
+      alignment: Alignment.center,
+      height: 50,
+      width: 195,
+      decoration: BoxDecoration(
+        color: Colors.green,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: TextButton(
+        onPressed: () {
+          //postData1();
+          //postData2(_clickedMaterialButton - 1);
+          postData3();
+        },
+        child: Text(
+          'Post',
+          style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
+        ),
+      ),
+    );
+  }
+
+  Widget _myUnitMeasurement(int index) {
+    return Expanded(
+      child: Container(
+        height: 50,
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        decoration: BoxDecoration(
+          color: _changeColor(_unitMeasurementController![index]),
+          border: Border.all(
+              color: _changeBorderColor(_unitMeasurementController![index])),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: TextField(
+          cursorHeight: 14,
+          style: TextStyle(fontSize: 16),
+          decoration: InputDecoration(
+            labelStyle: TextStyle(fontSize: 10),
+            labelText: 'Ед. измерения (type: int)',
+            border: InputBorder.none,
+          ),
+          controller: _unitMeasurementController![index],
+          onTapOutside: (event) =>
+              FocusManager.instance.primaryFocus?.unfocus(),
+          onChanged: (value) {
+            setState(() {});
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropDownMenu() {
+    final List<String> places = ['material', 'accessoires'];
+    final List<String> placesRu = ['Материал', 'Аксессуары'];
+
+    return Column(
+      children: <Widget>[
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 50,
+                color: Colors.green,
+              ),
+            ),
+            SizedBox(width: 7),
+            Expanded(
+              child: Container(
+                height: 50,
+                padding: EdgeInsets.symmetric(horizontal: 15),
+                decoration: BoxDecoration(
+                    color: _emptyString(str) ? Color(0xfff0f0f0) : Colors.white,
+                    border: Border.all(
+                        color: _emptyString(str)
+                            ? Colors.transparent
+                            : Color(0xffD2D2D2)),
+                    borderRadius: BorderRadius.circular(15)),
+                child: DropdownButtonFormField<String>(
+                  dropdownColor: Colors.black,
+                  borderRadius: BorderRadius.circular(15),
+                  decoration: InputDecoration(
+                    contentPadding:
+                        EdgeInsets.only(left: 0, right: 0, top: 9, bottom: 9),
+                    labelText: 'Тип',
+                    labelStyle: TextStyle(fontSize: 10),
+                    border: InputBorder.none,
+                  ),
+                  selectedItemBuilder: (_) {
+                    return placesRu
+                        .map((e) => Text(
+                              e,
+                              style: TextStyle(
+                                fontWeight: FontWeight.normal,
+                                color: Colors.black,
+                                fontSize: 16,
+                                height: 0,
+                              ),
+                            ))
+                        .toList();
+                  },
+                  value: str,
+                  icon: Icon(Icons.arrow_drop_down),
+                  items: places.mapIndexed((int index, String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        placesRu[index],
+                        style: TextStyle(
+                          color: Colors.white,
+                          height: 0,
+                          fontSize: 16,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (_newValue) {
+                    setState(() {
+                      str = _newValue;
+                    });
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+        /* IconButton(
+          icon: Image.asset('assets/Dropdown_arrow.png'),
+          color: Color(0xffFFFFFF),
+          onPressed: () {
+            //Navigator.pop(dropdownKey.currentContext!);
+          },
+        ), */
+
+        SizedBox(
+          height: 50,
+        )
+      ],
+    );
+  }
+
+  Widget _unitMeasurement(int index) {
+    // str,
+    final List<String> places = ['material', 'accessoires'];
+    final List<String> placesRu = ['Материал', 'Аксессуары'];
+    return Expanded(
+      child: Container(
+        height: 50,
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        decoration: BoxDecoration(
+            color: _emptyString(str) ? Color(0xfff0f0f0) : Colors.white,
+            border: Border.all(
+                color:
+                    _emptyString(str) ? Colors.transparent : Color(0xffD2D2D2)),
+            borderRadius: BorderRadius.circular(15)),
+        child: DropdownButtonFormField<String>(
+          dropdownColor: Colors.black,
+          borderRadius: BorderRadius.circular(15),
+          decoration: InputDecoration(
+            contentPadding:
+                EdgeInsets.only(left: 0, right: 0, top: 9, bottom: 9),
+            labelText: 'Ед. измерения (type: int)',
+            labelStyle: TextStyle(fontSize: 10),
+            border: InputBorder.none,
+          ),
+          selectedItemBuilder: (_) {
+            return placesRu
+                .map((e) => Text(
+                      e,
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black,
+                        fontSize: 16,
+                        height: 0,
+                      ),
+                    ))
+                .toList();
+          },
+          value: str,
+          icon: Icon(Icons.arrow_drop_down),
+          items: places.mapIndexed((int index, String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                placesRu[index],
+                style: TextStyle(
+                  color: Colors.white,
+                  height: 0,
+                  fontSize: 16,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: (_newValue) {
+            setState(() {
+              str = _newValue;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _unitMeasurement3(int index) {
+    return Expanded(
+      child: Container(
+        height: 50,
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        decoration: BoxDecoration(
+          color: _changeColor(_unitMeasurementController![index]),
+          border: Border.all(
+              color: _changeBorderColor(_unitMeasurementController![index])),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: TextField(
+          cursorHeight: 14,
+          style: TextStyle(fontSize: 16),
+          decoration: InputDecoration(
+            labelStyle: TextStyle(fontSize: 10),
+            labelText: 'Ед. измерения (type: int)',
+            border: InputBorder.none,
+          ),
+          controller: _unitMeasurementController![index],
+          onTapOutside: (event) =>
+              FocusManager.instance.primaryFocus?.unfocus(),
+          onChanged: (value) {
+            setState(() {});
+          },
         ),
       ),
     );

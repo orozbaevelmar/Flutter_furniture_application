@@ -4,13 +4,29 @@ A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Релизовать страницу для создания артикула ввиде приложения
 
-A few resources to get you started if this is your first Flutter project:
+Дизайн: https://www.figma.com/file/Pb2n9bRcyeC9qXiXVu3N4X/Learning-Material%3A-Sub-model-creating?type=design&node-id=2-299&mode=design
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Api: 
+https://intern.salamhalal.info/api/swagger/ - ссылка на сваггер
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+/apricle/ POST - создание артикула с базовыми полями.
+/article_item/ POST - создание кол-во материала для артикула
+/item/ POST - создание материала/фурнитуры
+
+
+https://intern.salamhalal.info/graphql/ - ссылка на graphql
+Там можно взять все нужные данные с возможностью фильтрации.
+
+Вы должны использовать:
+    Рестапи для записи данных.
+    Graphql для чтение данных.
+
+
+Требование к результату
+
+Возможность создать артикул с указанием материалов и фурнитур
+По фурнитурам и материалов должен быть поиск с автокомплита с возможностью добавить если его нету
+
+Опубликовать код в github и прислать плюс отправить apk что бы дать возможность протестить
