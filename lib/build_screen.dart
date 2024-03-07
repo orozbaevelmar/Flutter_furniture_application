@@ -1,18 +1,17 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:furniture_application/methods/method.dart';
+import 'package:furniture_application/methods/post_data.dart';
 import 'package:collection/collection.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class BuildScreen extends StatefulWidget {
+  BuildScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<BuildScreen> createState() => _BuildScreenState();
 }
 
-//_numberController _descriptionController _materialAndColorController _quantityPerProductController _unitMeasurementController
-
-class _HomeScreenState extends State<HomeScreen> {
+class _BuildScreenState extends State<BuildScreen> {
   // TextEditingController -----------------------------------------------------
   final TextEditingController _numberController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -25,53 +24,27 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   List<String?>? _unitMeasurementController = [null];
 
-  /* final TextEditingController _materialAndColorController =
-      TextEditingController();
-  final TextEditingController _quantityPerProductController =
-      TextEditingController();
-  final TextEditingController _unitMeasurementController =
-      TextEditingController(); */
-
   //furniture
-  //_furnitureAndColorController _furnitureQuantityPerProductController _furnitureUnitMeasurementController
   final TextEditingController _furnitureAndColorController =
       TextEditingController();
   final TextEditingController _furnitureQuantityPerProductController =
       TextEditingController();
   String? _strFurnitureUnitMeasurement;
 
-  // Color ---------------------------------------------------------------------
-  Color _colorNumberArticul = Color(0xfff0f0f0);
-  Color _colorDescriptionArticul = Color(0xfff0f0f0);
-
-  // furniture
-  Color _colorFurnitureMaterialAndColor = Color(0xfff0f0f0);
-  Color _colorFurnitureQuantityPerProduct = Color(0xfff0f0f0);
-  Color _colorFurnitureUnitMeasurement = Color(0xfff0f0f0);
-
-  Color _changeColor(TextEditingController controller) {
-    return controller.text.isEmpty ? Color(0xfff0f0f0) : Colors.white;
-  }
-
-  Color _changeBorderColor(TextEditingController controller) {
-    return controller.text.isEmpty ? Colors.transparent : Color(0xffD2D2D2);
-  }
-
   bool _filledAllMaterialControllersAbove(int index) {
     return _materialAndColorController![index].text.isNotEmpty &&
         _quantityPerProductController![index].text.isNotEmpty &&
-        _notEmptyString(_unitMeasurementController![index]);
+        _method.notEmptyString(_unitMeasurementController![index]);
   }
 
-  bool filledAllFurnitureControllersAbove() {
+  bool _filledAllFurnitureControllersAbove() {
     return _furnitureAndColorController.text.isNotEmpty &&
         _furnitureQuantityPerProductController.text.isNotEmpty &&
-        _notEmptyString(_strFurnitureUnitMeasurement);
+        _method.notEmptyString(_strFurnitureUnitMeasurement);
   }
 
   // Should be always more than 1, because it will build ListView
-  var _clickedMaterialButton = 1;
-  bool _clickedFurnitureButton = false;
+  int _clickedMaterialButton = 1;
 
   bool _checkAndSave() {
     return _numberController.text.isNotEmpty &&
@@ -81,301 +54,146 @@ class _HomeScreenState extends State<HomeScreen> {
         _quantityPerProductController![_clickedMaterialButton - 1]
             .text
             .isNotEmpty &&
-        _notEmptyString(
+        _method.notEmptyString(
             _unitMeasurementController?[_clickedMaterialButton - 1]) &&
         _furnitureAndColorController.text.isNotEmpty &&
         _furnitureQuantityPerProductController.text.isNotEmpty &&
-        _notEmptyString(_strFurnitureUnitMeasurement);
+        _method.notEmptyString(_strFurnitureUnitMeasurement);
   }
 
-  /* Future<void> _postData() async {
-    // URL вашего эндпоинта для создания записи
-    String url1 = 'https://intern.salamhalal.info/api/article';
-    /* String url2 = 'https://intern.salamhalal.info/api/article_item';
-    String url3 = 'https://intern.salamhalal.info/api/item'; */
-
-    
-    var data1 = {
-      'number': _numberController.text,
-      'description': _descriptionController.text,
-    };
-
-    /* var data2 = {
-      'quantity': _materialAndColorController.text,
-      'article': _quantityPerProductController.text,
-      'item': _unitMeasurementController.text,
-    };
-
-    var data3 = {
-      'name': _furnitureAndColorController.text,
-      'item_type': _furnitureQuantityPerProductController.text,
-      'measurement': _furnitureUnitMeasurementController.text,
-    }; */
-
-    
-    var response1 = await http.post(
-      Uri.parse(url1), body: json.encode(data1),
-      headers: {"Content-Type": "application/json"},
-      //headers: {'Content-Type': 'application/json'},
-    );
-    /* var response2 = await http.post(
-      Uri.parse(url2),
-      body: json.encode(data2),
-    );
-    var response3 = await http.post(
-      Uri.parse(url3),
-      body: json.encode(data3),
-    ); */
-    print("${response1.statusCode}");
-    print("${response1.body}");
-   
-    if (response1.statusCode == 201) {
-      print('1 Данные успешно добавлены');
-    } else {
-      print('1 Произошла ошибка: ${response1.reasonPhrase}');
-    }
-    /*  if (response2.statusCode == 201) {
-      print('2 Данные успешно добавлены');
-    } else {
-      print('2 Произошла ошибка: ${response2.reasonPhrase}');
-    }
-
-    if (response3.statusCode == 201) {
-      print('3 Данные успешно добавлены');
-    } else {
-      print('3 Произошла ошибка: ${response3.reasonPhrase}');
-    } */
-  } */
-
-  //final apiUrl = 'https://intern.salamhalal.info/api/article';
-
-  /* var url1 = 'https://intern.salamhalal.info/api/article';
-  var url2 = 'https://intern.salamhalal.info/api/article_item';
-  var url3 = 'https://intern.salamhalal.info/api/item'; */
-
-  /* Future<void> postData() async {
-    
-    // String url = 'https://intern.salamhalal.info/api/article/';
-
-    
-    Map<String, dynamic> data1 = {
-      'number': 'gfdgdf',
-      'description': 'gfdgdfsghdf'
-    };
-
-    /* Map<String, dynamic> data2 = {
-      'quantity': _materialAndColorController.text,
-      'article': _quantityPerProductController.text,
-      'item': _unitMeasurementController.text,
-    };
-
-    Map<String, dynamic> data3 = {
-      'name': _furnitureAndColorController.text,
-      'item_type': _furnitureQuantityPerProductController.text,
-      'measurement': _furnitureUnitMeasurementController.text,
-    }; */
-
-    try {
-      final response1 = await http.post(
-        Uri.parse(url1),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(data1),
-      );
-
-      /* final response2 = await http.post(
-        Uri.parse(url2),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(data2),
-      );
-
-      final response3 = await http.post(
-        Uri.parse(url3),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(data3),
-      ); */
-
-      if (response1.statusCode == 201) {
-        print('Успешно отправлено (Информация об артикуле): ${response1.body}');
-        /* print('Успешно отправлено (Материал): ${response2.body}');
-        print('Успешно отправлено (Фурнитура): ${response3.body}'); */
-      } else {
-        print(
-            'Ошибка при отправлении данных (Информация об артикуле): ${response1.statusCode}');
-        /*  print(
-            'Ошибка при отправлении данных (Материал): ${response2.statusCode}');
-        print(
-            'Ошибка при отправлении данных (Фурнитура): ${response3.statusCode}'); */
-      }// 
-    } catch (error) {
-      print('Ошибка при выполнении запроса: $error');
-    }
-  } */
-
-  Future<void> postData1() async {
-    // var url1 = '';
-    Map<String, dynamic> data = {
-      //'name': '',
-      'number': _numberController.text,
-      'description': _descriptionController.text,
-    };
-    try {
-      final response = await http.post(
-        Uri.parse('https://intern.salamhalal.info/api/article/'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(data),
-      );
-
-      if (response.statusCode == 201) {
-        print('Успешно отправлено(Информация об артикуле): ${response.body}');
-      } else {
-        print('Ошибка(Информация об артикуле): ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Ошибка при выполнении запроса(Информация об артикуле): $error');
-    }
-  }
-
-  Future<void> postData2(int index) async {
-    var url2 = 'https://intern.salamhalal.info/api/article_item/';
-    Map<String, dynamic> data2 = {
-      'quantity': int.parse(_quantityPerProductController![index].text),
-      'article': int.parse(_materialAndColorController![index].text),
-      'item': int.parse(_unitMeasurementController![index] ?? '0'),
-    };
-
-    try {
-      final response2 = await http.post(
-        Uri.parse(url2),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(data2),
-      );
-
-      if (response2.statusCode == 201) {
-        print('Успешно отправлено(Материал): ${response2.body}');
-      } else {
-        print('Ошибка(Материал): ${response2.statusCode}');
-      }
-    } catch (error) {
-      print('Ошибка при выполнении запроса(Материал): $error');
-    }
-  }
-
-  Future<void> postData3() async {
-    var url3 = 'https://intern.salamhalal.info/api/item/';
-
-    Map<String, dynamic> data3 = {
-      'name': _furnitureAndColorController.text,
-      'item_type': _strFurnitureUnitMeasurement,
-      'measurement': int.parse(_furnitureQuantityPerProductController.text),
-    };
-    try {
-      print(_furnitureAndColorController.text);
-      print(_strFurnitureUnitMeasurement);
-      print(_furnitureQuantityPerProductController.text);
-      final response3 = await http.post(
-        Uri.parse(url3),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(data3),
-      );
-
-      if (response3.statusCode == 201) {
-        print('Успешно отправлено(Фурнитура): ${response3.body}');
-      } else {
-        print('Ошибка(Фурнитура): ${response3.statusCode}');
-      }
-    } catch (error) {
-      print('Ошибка при выполнении запроса(Фурнитура): $error');
-    }
-  }
-
-  Color _changeColorForString(String? str) {
-    return (str?.isEmpty ?? true) ? Color(0xfff0f0f0) : Colors.white;
-  }
-
-  Color _changeBorderColorForString(String? str) {
-    return (str?.isEmpty ?? true) ? Colors.transparent : Color(0xffD2D2D2);
-  }
-
-  bool _emptyString(String? str) {
-    return str?.isEmpty ?? true;
-  }
-
-  bool _notEmptyString(String? str) {
-    return str?.isNotEmpty ?? false;
-  }
-
-  String? selectedType;
+  Method _method = Method();
+  PostData _postData = PostData();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Container(
-          alignment: Alignment.centerLeft,
-          padding: EdgeInsets.only(left: 20),
-          child: Text(
-            'Booster',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      appBar: _appBar(),
+      body: _buildGraph(),
+    );
+  }
+
+  AppBar _appBar() {
+    return AppBar(
+      title: Container(
+        alignment: Alignment.centerLeft,
+        padding: EdgeInsets.only(left: 20),
+        child: Text(
+          'Booster',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ),
+      actions: [
+        Padding(
+          padding: EdgeInsets.only(right: 20),
+          child: Image(
+            image: AssetImage('assets/property1.png'),
           ),
         ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 20),
-            child: Image(
-              image: AssetImage('assets/property1.png'),
-            ),
-          ),
-        ],
+      ],
+    );
+  }
+
+  Widget _buildGraph() {
+    String readRepositories = r"""
+query ($name: String!) {
+  __type(name: $name) {
+   name 
+  }
+  company {
+    ceo
+    coo
+  }
+}
+""";
+
+    List<dynamic> list = ['__typename', 'ceo', 'coo'];
+    return Query(
+      options: QueryOptions(
+        document: gql(readRepositories),
+        variables: {'name': 'users'},
+        pollInterval: const Duration(seconds: 10),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            children: [
-              _myButton(),
+      builder: (QueryResult result,
+          {VoidCallback? refetch, FetchMore? fetchMore}) {
+        //fds
+        /* if (result.hasException) {
+          return Text('Error: ${result.exception.toString()}');
+        }
 
-              // Info About Articul
-              _infoArticul(),
-              _numberArticul(),
-              SizedBox(height: 216 - 158 - 50),
-              _descriptionArticul(),
+        if (result.isLoading) {
+          return const Text('Is Loading...');
+        }
 
-              // Material
-              _materialText(),
-              _buildMaterialListView(),
-              _materialButton(),
-              SizedBox(height: 564 - 506 - 50),
+        Map<String, dynamic>? repositories = result.data?['company'];
 
-              // furniture
-              _furnitureText(),
-              _furnitureMaterialAndColor(),
-              SizedBox(height: 854 - 796 - 50),
-              Row(children: [
-                _furnitureQuantityPerProduct(),
-                SizedBox(width: 7),
-                _furnitureUnitMeasurement(),
-              ]),
-              SizedBox(height: 796 - 738 - 50),
-              _furnitureButton(),
-              SizedBox(height: 912 - 796 - 50),
+        if (repositories == null) {
+          return const Text('No repositories');
+        } */
 
-              // Save
-              _saveButton(),
-              SizedBox(height: 50),
-            ],
-          ),
+        return _buildBody(result);
+        /* Container(
+          child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: repositories.length,
+              itemBuilder: (context, index) {
+                final repository = repositories[list[index]];
+
+                return Text('$repository' ?? '');
+              }),
+        ); */
+      },
+    );
+  }
+
+  Widget _buildBody(QueryResult result) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        child: Column(
+          children: [
+            // Info About Articul
+            _infoArticul(),
+            _numberArticul(),
+            SizedBox(height: 216 - 158 - 50),
+            _descriptionArticul(),
+
+            // Material
+            _materialText(),
+            _buildMaterialListView(),
+            _materialButton(),
+            SizedBox(height: 564 - 506 - 50),
+
+            // furniture
+            _furnitureText(),
+            _furnitureMaterialAndColor(),
+            SizedBox(height: 854 - 796 - 50),
+            Row(children: [
+              _furnitureQuantityPerProduct(),
+              SizedBox(width: 7),
+              _furnitureUnitMeasurement(),
+            ]),
+            SizedBox(height: 796 - 738 - 50),
+            _furnitureButton(),
+            SizedBox(height: 912 - 796 - 50),
+
+            // Save
+            Row(
+              children: [
+                _postDataButton(),
+                SizedBox(width: 10),
+                _fetchDataButton(result),
+              ],
+            ),
+
+            /* SizedBox(height: 50),
+              characters.isNotEmpty
+                  ? _buildContainer()
+                  : Container(
+                      child:
+                          _loading ? CircularProgressIndicator() : Container(),
+                    ), */
+            SizedBox(height: 50),
+          ],
         ),
       ),
     );
@@ -397,8 +215,8 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 50,
       padding: EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
-        color: _colorNumberArticul,
-        border: Border.all(color: _changeBorderColor(_numberController)),
+        color: _method.changeColor(_numberController),
+        border: Border.all(color: _method.changeBorderColor(_numberController)),
         borderRadius: BorderRadius.circular(15),
       ),
       child: TextField(
@@ -412,9 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
         controller: _numberController,
         onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
         onChanged: (value) {
-          setState(() {
-            _colorNumberArticul = _changeColor(_numberController);
-          });
+          setState(() {});
         },
       ),
     );
@@ -425,8 +241,9 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 166,
       padding: EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
-        color: _colorDescriptionArticul,
-        border: Border.all(color: _changeBorderColor(_descriptionController)),
+        color: _method.changeColor(_descriptionController),
+        border: Border.all(
+            color: _method.changeBorderColor(_descriptionController)),
         borderRadius: BorderRadius.circular(15),
       ),
       child: TextField(
@@ -441,9 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
         controller: _descriptionController,
         onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
         onChanged: (value) {
-          setState(() {
-            _colorDescriptionArticul = _changeColor(_descriptionController);
-          });
+          setState(() {});
         },
       ),
     );
@@ -467,9 +282,6 @@ class _HomeScreenState extends State<HomeScreen> {
       shrinkWrap: true,
       itemCount: _clickedMaterialButton,
       itemBuilder: (context, index) {
-        _materialAndColorController?.add(TextEditingController());
-        _quantityPerProductController?.add(TextEditingController());
-        _unitMeasurementController?.add(null);
         return Column(
           children: [
             //SizedBox(height: 564 - 506 - 50),
@@ -496,9 +308,10 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 340,
           padding: EdgeInsets.symmetric(horizontal: 15),
           decoration: BoxDecoration(
-            color: _changeColor(_materialAndColorController![index]),
+            color: _method.changeColor(_materialAndColorController![index]),
             border: Border.all(
-              color: _changeBorderColor(_materialAndColorController![index]),
+              color: _method
+                  .changeBorderColor(_materialAndColorController![index]),
             ),
             borderRadius: BorderRadius.circular(15),
           ),
@@ -534,23 +347,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: IconButton(
             onPressed: () {
-              /* _materialAndColorController.text.isEmpty
-                  ? null
-                  : _materialAndColorController.clear(); */
               setState(() {
-                /* _colorMaterialAndColor =
-                    _changeColor(_materialAndColorController); */
-                _materialAndColorController![index].clear();
-                _quantityPerProductController![index].clear();
-                //_unitMeasurementController!.removeLast();
-                //_unitMeasurementController!.add(null);
-
-                //_unitMeasurementController![index]!.replaceRange(0, null, '');
                 if (_clickedMaterialButton > 1) {
                   _clickedMaterialButton--;
                   _materialAndColorController!.removeLast();
                   _quantityPerProductController!.removeLast();
                   _unitMeasurementController!.removeLast();
+                } else {
+                  _materialAndColorController![index].clear();
+                  _quantityPerProductController![index].clear();
+                  _unitMeasurementController![index] = null;
                 }
               });
             },
@@ -572,9 +378,10 @@ class _HomeScreenState extends State<HomeScreen> {
         height: 50,
         padding: EdgeInsets.symmetric(horizontal: 15),
         decoration: BoxDecoration(
-          color: _changeColor(_quantityPerProductController![index]),
+          color: _method.changeColor(_quantityPerProductController![index]),
           border: Border.all(
-              color: _changeBorderColor(_quantityPerProductController![index])),
+              color: _method
+                  .changeBorderColor(_quantityPerProductController![index])),
           borderRadius: BorderRadius.circular(15),
         ),
         child: TextField(
@@ -606,9 +413,10 @@ class _HomeScreenState extends State<HomeScreen> {
         height: 50,
         padding: EdgeInsets.symmetric(horizontal: 15),
         decoration: BoxDecoration(
-            color: _changeColorForString(_unitMeasurementController![idx]),
+            color:
+                _method.changeColorForString(_unitMeasurementController![idx]),
             border: Border.all(
-                color: _changeBorderColorForString(
+                color: _method.changeBorderColorForString(
                     _unitMeasurementController![idx])),
             borderRadius: BorderRadius.circular(15)),
         child: DropdownButtonFormField<String>(
@@ -686,6 +494,9 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_filledAllMaterialControllersAbove(_clickedMaterialButton - 1)) {
             setState(() {
               _clickedMaterialButton++;
+              _materialAndColorController?.add(TextEditingController());
+              _quantityPerProductController?.add(TextEditingController());
+              _unitMeasurementController?.add(null);
             });
           }
         },
@@ -717,9 +528,9 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 340,
           padding: EdgeInsets.symmetric(horizontal: 15),
           decoration: BoxDecoration(
-            color: _colorFurnitureMaterialAndColor,
+            color: _method.changeColor(_furnitureAndColorController),
             border: Border.all(
-                color: _changeBorderColor(_furnitureAndColorController)),
+                color: _method.changeBorderColor(_furnitureAndColorController)),
             borderRadius: BorderRadius.circular(15),
           ),
           child: TextField(
@@ -734,10 +545,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onTapOutside: (event) =>
                 FocusManager.instance.primaryFocus?.unfocus(),
             onChanged: (value) {
-              setState(() {
-                _colorFurnitureMaterialAndColor =
-                    _changeColor(_furnitureAndColorController);
-              });
+              setState(() {});
             },
           ),
         ),
@@ -745,31 +553,31 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 50,
           width: 50,
           decoration: BoxDecoration(
-            color: _furnitureAndColorController.text.isEmpty
-                ? Color(0xffCCCCCC)
-                : Colors.white,
+            color: _filledAllFurnitureControllersAbove()
+                ? Colors.white
+                : Color(0xffCCCCCC),
             border: Border.all(
-              color: _furnitureAndColorController.text.isEmpty
-                  ? Color(0xfff0f0f0)
-                  : Color(0xff47A6DC),
+              color: _filledAllFurnitureControllersAbove()
+                  ? Color(0xff47A6DC)
+                  : Color(0xfff0f0f0),
             ),
             shape: BoxShape.circle,
           ),
           child: IconButton(
             onPressed: () {
-              _furnitureAndColorController.text.isEmpty
-                  ? null
-                  : _furnitureAndColorController.clear();
               setState(() {
-                _colorFurnitureMaterialAndColor =
-                    _changeColor(_furnitureAndColorController);
+                if (_filledAllFurnitureControllersAbove()) {
+                  _furnitureAndColorController.clear();
+                  _furnitureQuantityPerProductController.clear();
+                  _strFurnitureUnitMeasurement = null;
+                }
               });
             },
             icon: Icon(
               Icons.clear,
-              color: _furnitureAndColorController.text.isEmpty
-                  ? Colors.white
-                  : Color(0xff47A6DC),
+              color: _filledAllFurnitureControllersAbove()
+                  ? Color(0xff47A6DC)
+                  : Colors.white,
             ),
           ),
         ),
@@ -783,10 +591,10 @@ class _HomeScreenState extends State<HomeScreen> {
         height: 50,
         padding: EdgeInsets.symmetric(horizontal: 15),
         decoration: BoxDecoration(
-          color: _colorFurnitureQuantityPerProduct,
+          color: _method.changeColor(_furnitureQuantityPerProductController),
           border: Border.all(
-              color:
-                  _changeBorderColor(_furnitureQuantityPerProductController)),
+              color: _method
+                  .changeBorderColor(_furnitureQuantityPerProductController)),
           borderRadius: BorderRadius.circular(15),
         ),
         child: TextField(
@@ -801,10 +609,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onTapOutside: (event) =>
               FocusManager.instance.primaryFocus?.unfocus(),
           onChanged: (value) {
-            setState(() {
-              _colorFurnitureQuantityPerProduct =
-                  _changeColor(_furnitureQuantityPerProductController);
-            });
+            setState(() {});
           },
         ),
       ),
@@ -820,10 +625,11 @@ class _HomeScreenState extends State<HomeScreen> {
         height: 50,
         padding: EdgeInsets.symmetric(horizontal: 15),
         decoration: BoxDecoration(
-            color: _changeColorForString(
+            color: _method.changeColorForString(
                 _strFurnitureUnitMeasurement), //_emptyString(_strFurnitureUnitMeasurement) ? Color(0xfff0f0f0) : Colors.white,
             border: Border.all(
-                color: _changeBorderColorForString(_strFurnitureUnitMeasurement)
+                color: _method
+                    .changeBorderColorForString(_strFurnitureUnitMeasurement)
                 //_emptyString(_strFurnitureUnitMeasurement) ? Colors.transparent : Color(0xffD2D2D2)
                 ),
             borderRadius: BorderRadius.circular(15)),
@@ -881,19 +687,13 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 50,
       width: 195,
       decoration: BoxDecoration(
-        color: filledAllFurnitureControllersAbove()
+        color: _filledAllFurnitureControllersAbove()
             ? Color(0xff47A6DC)
             : Color(0xffCCCCCC),
         borderRadius: BorderRadius.circular(15),
       ),
       child: TextButton(
-        onPressed: () {
-          if (filledAllFurnitureControllersAbove()) {
-            setState(() {
-              _clickedFurnitureButton = !_clickedFurnitureButton;
-            });
-          }
-        },
+        onPressed: () {},
         child: Text(
           '+ фурнитура',
           style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
@@ -902,7 +702,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _saveButton() {
+  Widget _postDataButton() {
     return Container(
       alignment: Alignment.center,
       height: 50,
@@ -913,33 +713,57 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: TextButton(
         onPressed: () {
-          postData1();
+          setState(() {
+            _postData.postData1(_numberController, _descriptionController);
+            _postData.postData2(
+                _clickedMaterialButton - 1,
+                _quantityPerProductController![_clickedMaterialButton - 1],
+                _materialAndColorController![_clickedMaterialButton - 1],
+                _unitMeasurementController![_clickedMaterialButton - 1]);
+            _postData.postData3(
+                _furnitureAndColorController,
+                _strFurnitureUnitMeasurement,
+                _furnitureQuantityPerProductController);
+          });
         },
         child: Text(
-          'Сохранить',
+          'Post Data',
           style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
         ),
       ),
     );
   }
 
-  Widget _myButton() {
+  Widget _fetchDataButton(QueryResult result) {
     return Container(
       alignment: Alignment.center,
       height: 50,
       width: 195,
       decoration: BoxDecoration(
-        color: Colors.green,
+        color: Color(0xff47A6DC),
         borderRadius: BorderRadius.circular(15),
       ),
       child: TextButton(
         onPressed: () {
-          //postData1();
-          //postData2(_clickedMaterialButton - 1);
-          postData3();
+          if (result.hasException) {
+            _numberController.text = 'Error: ${result.exception.toString()}';
+          } else if (result.isLoading) {
+            _numberController.text = 'Is Loading...';
+          }
+
+          Map<String, dynamic>? repositories = result.data?['company'];
+
+          if (repositories == null) {
+            _numberController.text = 'No repositories';
+          } else {
+            setState(() {
+              _numberController.text = repositories['ceo'];
+              _descriptionController.text = repositories['coo'];
+            });
+          }
         },
         child: Text(
-          'Post',
+          'Fetch Data',
           style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
         ),
       ),

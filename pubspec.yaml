@@ -38,6 +38,7 @@ dependencies:
   dropdown_button2: ^2.3.9
   http: ^1.2.1
   collection: ^1.18.0
+  graphql_flutter: ^5.1.2
 
 dev_dependencies:
   flutter_test:
