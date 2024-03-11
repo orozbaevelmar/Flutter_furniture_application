@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:furniture_application/methods/method.dart';
 import 'package:furniture_application/methods/post_data.dart';
 import 'package:collection/collection.dart';
@@ -16,6 +18,7 @@ class _BuildScreenState extends State<BuildScreen> {
   final TextEditingController _numberController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
+  // Material
   List<TextEditingController>? _materialAndColorController = [
     TextEditingController()
   ];
@@ -64,6 +67,39 @@ class _BuildScreenState extends State<BuildScreen> {
   Method _method = Method();
   PostData _postData = PostData();
 
+  String readRepositories = r"""
+query ($name: String!) {
+  __type(name: $name) {
+   name 
+  }
+  company {
+    __typename
+    summary
+    employees
+    test_sites
+    vehicles
+    ceo
+    launch_sites
+    coo
+  }
+}
+""";
+
+  List<String> direction = ['company'];
+
+  List<String> list = [
+    '__typename',
+    'summary',
+    'employees',
+    'test_sites',
+    'vehicles',
+    'ceo',
+    'launch_sites',
+    'coo'
+  ];
+
+  List<String> _resultList = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,7 +113,7 @@ class _BuildScreenState extends State<BuildScreen> {
       title: Container(
         alignment: Alignment.centerLeft,
         padding: EdgeInsets.only(left: 20),
-        child: Text(
+        child: const Text(
           'Booster',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
@@ -94,19 +130,6 @@ class _BuildScreenState extends State<BuildScreen> {
   }
 
   Widget _buildGraph() {
-    String readRepositories = r"""
-query ($name: String!) {
-  __type(name: $name) {
-   name 
-  }
-  company {
-    ceo
-    coo
-  }
-}
-""";
-
-    List<dynamic> list = ['__typename', 'ceo', 'coo'];
     return Query(
       options: QueryOptions(
         document: gql(readRepositories),
@@ -115,7 +138,6 @@ query ($name: String!) {
       ),
       builder: (QueryResult result,
           {VoidCallback? refetch, FetchMore? fetchMore}) {
-        //fds
         /* if (result.hasException) {
           return Text('Error: ${result.exception.toString()}');
         }
@@ -174,7 +196,8 @@ query ($name: String!) {
             ]),
             SizedBox(height: 796 - 738 - 50),
             _furnitureButton(),
-            SizedBox(height: 912 - 796 - 50),
+
+            _resultList.isEmpty ? SizedBox(height: 120) : _result(),
 
             // Save
             Row(
@@ -220,9 +243,10 @@ query ($name: String!) {
         borderRadius: BorderRadius.circular(15),
       ),
       child: TextField(
-        cursorHeight: 14,
+        //cursorHeight: 14,
         style: TextStyle(fontSize: 16),
         decoration: InputDecoration(
+          contentPadding: const EdgeInsets.only(top: 7, bottom: 7),
           labelStyle: TextStyle(fontSize: 10),
           labelText: 'Номер артикула (type: String)',
           border: InputBorder.none,
@@ -303,32 +327,34 @@ query ($name: String!) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          height: 50,
-          width: 340,
-          padding: EdgeInsets.symmetric(horizontal: 15),
-          decoration: BoxDecoration(
-            color: _method.changeColor(_materialAndColorController![index]),
-            border: Border.all(
-              color: _method
-                  .changeBorderColor(_materialAndColorController![index]),
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.only(right: 10),
+            height: 50,
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            decoration: BoxDecoration(
+              color: _method.changeColor(_materialAndColorController![index]),
+              border: Border.all(
+                color: _method
+                    .changeBorderColor(_materialAndColorController![index]),
+              ),
+              borderRadius: BorderRadius.circular(15),
             ),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: TextField(
-            cursorHeight: 14,
-            style: TextStyle(fontSize: 16),
-            decoration: InputDecoration(
-              labelStyle: TextStyle(fontSize: 10),
-              labelText: 'Материал, цвет (type: int)',
-              border: InputBorder.none,
+            child: TextField(
+              style: const TextStyle(fontSize: 16),
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.only(top: 7, bottom: 7),
+                labelStyle: TextStyle(fontSize: 10),
+                labelText: 'Материал, цвет (type: int)',
+                border: InputBorder.none,
+              ),
+              controller: _materialAndColorController![index],
+              onTapOutside: (event) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
+              onChanged: (value) {
+                setState(() {});
+              },
             ),
-            controller: _materialAndColorController![index],
-            onTapOutside: (event) =>
-                FocusManager.instance.primaryFocus?.unfocus(),
-            onChanged: (value) {
-              setState(() {});
-            },
           ),
         ),
         Container(
@@ -376,7 +402,7 @@ query ($name: String!) {
     return Expanded(
       child: Container(
         height: 50,
-        padding: EdgeInsets.symmetric(horizontal: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 15),
         decoration: BoxDecoration(
           color: _method.changeColor(_quantityPerProductController![index]),
           border: Border.all(
@@ -385,9 +411,9 @@ query ($name: String!) {
           borderRadius: BorderRadius.circular(15),
         ),
         child: TextField(
-          cursorHeight: 14,
-          style: TextStyle(fontSize: 16),
-          decoration: InputDecoration(
+          style: const TextStyle(fontSize: 16),
+          decoration: const InputDecoration(
+            contentPadding: EdgeInsets.only(top: 7, bottom: 7),
             labelStyle: TextStyle(fontSize: 10),
             labelText: 'Кол-во на ед. прод. (type: int)',
             border: InputBorder.none,
@@ -411,7 +437,7 @@ query ($name: String!) {
     return Expanded(
       child: Container(
         height: 50,
-        padding: EdgeInsets.symmetric(horizontal: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 15),
         decoration: BoxDecoration(
             color:
                 _method.changeColorForString(_unitMeasurementController![idx]),
@@ -420,9 +446,10 @@ query ($name: String!) {
                     _unitMeasurementController![idx])),
             borderRadius: BorderRadius.circular(15)),
         child: DropdownButtonFormField<String>(
+          isExpanded: true,
           dropdownColor: Colors.black,
           borderRadius: BorderRadius.circular(15),
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             contentPadding:
                 EdgeInsets.only(left: 0, right: 0, top: 9, bottom: 9),
             labelText: 'Ед. измерения (type: int)',
@@ -431,26 +458,29 @@ query ($name: String!) {
           ),
           selectedItemBuilder: (_) {
             return placesRu
-                .map((e) => Text(
-                      e,
-                      /* // _unitMeasurementController![idx]
-                      _notEmptyString(_unitMeasurementController![idx])
-                          ? e
-                          : '', */
-                      style: TextStyle(
-                        fontWeight: FontWeight.normal,
-                        color: Colors.black,
-                        fontSize: 16,
-                        height: 0,
-                      ),
-                    ))
+                .map(
+                  (e) => /* SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: */
+                      Text(
+                    e,
+                    style: TextStyle(
+                      overflow: TextOverflow.ellipsis,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.black,
+                      fontSize: 16,
+                      height: 0,
+                    ),
+                  ),
+                )
+                //)
                 .toList();
           },
           value: _unitMeasurementController![idx],
           icon: Icon(Icons.arrow_drop_down),
           items: places.mapIndexed((int index, String value) {
             return DropdownMenuItem<String>(
-              value: placesRu[index],
+              value: value,
               child: Text(
                 placesRu[index],
                 style: TextStyle(
@@ -479,30 +509,33 @@ query ($name: String!) {
   }
 
   Widget _materialButton() {
-    return Container(
-      alignment: Alignment.center,
-      height: 50,
-      width: 195,
-      decoration: BoxDecoration(
-        color: _filledAllMaterialControllersAbove(_clickedMaterialButton - 1)
-            ? Color(0xff47A6DC)
-            : Color(0xffCCCCCC),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: TextButton(
-        onPressed: () {
-          if (_filledAllMaterialControllersAbove(_clickedMaterialButton - 1)) {
-            setState(() {
-              _clickedMaterialButton++;
-              _materialAndColorController?.add(TextEditingController());
-              _quantityPerProductController?.add(TextEditingController());
-              _unitMeasurementController?.add(null);
-            });
-          }
-        },
-        child: Text(
-          '+ материал',
-          style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
+    return Center(
+      child: Container(
+        alignment: Alignment.center,
+        height: 50,
+        width: 195,
+        decoration: BoxDecoration(
+          color: _filledAllMaterialControllersAbove(_clickedMaterialButton - 1)
+              ? Color(0xff47A6DC)
+              : Color(0xffCCCCCC),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: TextButton(
+          onPressed: () {
+            if (_filledAllMaterialControllersAbove(
+                _clickedMaterialButton - 1)) {
+              setState(() {
+                _clickedMaterialButton++;
+                _materialAndColorController?.add(TextEditingController());
+                _quantityPerProductController?.add(TextEditingController());
+                _unitMeasurementController?.add(null);
+              });
+            }
+          },
+          child: const Text(
+            '+ материал',
+            style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
+          ),
         ),
       ),
     );
@@ -523,30 +556,32 @@ query ($name: String!) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          height: 50,
-          width: 340,
-          padding: EdgeInsets.symmetric(horizontal: 15),
-          decoration: BoxDecoration(
-            color: _method.changeColor(_furnitureAndColorController),
-            border: Border.all(
-                color: _method.changeBorderColor(_furnitureAndColorController)),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: TextField(
-            cursorHeight: 14,
-            style: TextStyle(fontSize: 16),
-            decoration: InputDecoration(
-              labelStyle: TextStyle(fontSize: 10),
-              labelText: 'Материал, цвет (type: String)',
-              border: InputBorder.none,
+        Expanded(
+          child: Container(
+            height: 50,
+            margin: EdgeInsets.only(right: 10),
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            decoration: BoxDecoration(
+              color: _method.changeColor(_furnitureAndColorController),
+              border: Border.all(
+                  color:
+                      _method.changeBorderColor(_furnitureAndColorController)),
+              borderRadius: BorderRadius.circular(15),
             ),
-            controller: _furnitureAndColorController,
-            onTapOutside: (event) =>
-                FocusManager.instance.primaryFocus?.unfocus(),
-            onChanged: (value) {
-              setState(() {});
-            },
+            child: TextField(
+              style: TextStyle(fontSize: 16),
+              decoration: InputDecoration(
+                labelStyle: TextStyle(fontSize: 10),
+                labelText: 'Материал, цвет (type: String)',
+                border: InputBorder.none,
+              ),
+              controller: _furnitureAndColorController,
+              onTapOutside: (event) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
+              onChanged: (value) {
+                setState(() {});
+              },
+            ),
           ),
         ),
         Container(
@@ -598,7 +633,6 @@ query ($name: String!) {
           borderRadius: BorderRadius.circular(15),
         ),
         child: TextField(
-          cursorHeight: 14,
           style: TextStyle(fontSize: 16),
           decoration: InputDecoration(
             labelStyle: TextStyle(fontSize: 10),
@@ -617,7 +651,6 @@ query ($name: String!) {
   }
 
   Widget _furnitureUnitMeasurement() {
-    // _strFurnitureUnitMeasurement,
     final List<String> places = ['material', 'accessories'];
     final List<String> placesRu = ['Материал', 'Аксессуары'];
     return Expanded(
@@ -634,6 +667,7 @@ query ($name: String!) {
                 ),
             borderRadius: BorderRadius.circular(15)),
         child: DropdownButtonFormField<String>(
+          isExpanded: true,
           dropdownColor: Colors.black,
           borderRadius: BorderRadius.circular(15),
           decoration: InputDecoration(
@@ -647,6 +681,7 @@ query ($name: String!) {
             return placesRu
                 .map((e) => Text(
                       e,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontWeight: FontWeight.normal,
                         color: Colors.black,
@@ -682,91 +717,139 @@ query ($name: String!) {
   }
 
   Widget _furnitureButton() {
-    return Container(
-      alignment: Alignment.center,
-      height: 50,
-      width: 195,
-      decoration: BoxDecoration(
-        color: _filledAllFurnitureControllersAbove()
-            ? Color(0xff47A6DC)
-            : Color(0xffCCCCCC),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: TextButton(
-        onPressed: () {},
-        child: Text(
-          '+ фурнитура',
-          style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
+    return Center(
+      child: Container(
+        alignment: Alignment.center,
+        height: 50,
+        width: 195,
+        decoration: BoxDecoration(
+          color: _filledAllFurnitureControllersAbove()
+              ? Color(0xff47A6DC)
+              : Color(0xffCCCCCC),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: TextButton(
+          onPressed: () {},
+          child: Text(
+            '+ фурнитура',
+            style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
+          ),
         ),
       ),
     );
   }
 
   Widget _postDataButton() {
-    return Container(
-      alignment: Alignment.center,
-      height: 50,
-      width: 195,
-      decoration: BoxDecoration(
-        color: _checkAndSave() ? Color(0xff47A6DC) : Color(0xffCCCCCC),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: TextButton(
-        onPressed: () {
-          setState(() {
-            _postData.postData1(_numberController, _descriptionController);
-            _postData.postData2(
-                _clickedMaterialButton - 1,
-                _quantityPerProductController![_clickedMaterialButton - 1],
-                _materialAndColorController![_clickedMaterialButton - 1],
-                _unitMeasurementController![_clickedMaterialButton - 1]);
-            _postData.postData3(
-                _furnitureAndColorController,
+    return Expanded(
+      child: Container(
+        alignment: Alignment.center,
+        height: 50,
+        decoration: BoxDecoration(
+          color: _checkAndSave() ? Color(0xff47A6DC) : Color(0xffCCCCCC),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: TextButton(
+          onPressed: () async {
+            if (_checkAndSave()) {
+              _postData.setResult();
+              await _postData.postData1(
+                  _numberController.text, _descriptionController.text);
+
+              await _postData.postData2(
+                  _clickedMaterialButton - 1,
+                  _materialAndColorController![_clickedMaterialButton - 1].text,
+                  _quantityPerProductController![_clickedMaterialButton - 1]
+                      .text,
+                  _unitMeasurementController![_clickedMaterialButton - 1]);
+              await _postData.postData3(
+                _furnitureAndColorController.text,
+                _furnitureQuantityPerProductController.text,
                 _strFurnitureUnitMeasurement,
-                _furnitureQuantityPerProductController);
-          });
-        },
-        child: Text(
-          'Post Data',
-          style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
+              );
+
+              setState(() {
+                _resultList = [];
+                _resultList = _postData.getRes;
+              });
+            }
+          },
+          child: const Text(
+            'Post Data',
+            style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
+          ),
         ),
       ),
     );
   }
 
   Widget _fetchDataButton(QueryResult result) {
-    return Container(
-      alignment: Alignment.center,
-      height: 50,
-      width: 195,
-      decoration: BoxDecoration(
-        color: Color(0xff47A6DC),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: TextButton(
-        onPressed: () {
-          if (result.hasException) {
-            _numberController.text = 'Error: ${result.exception.toString()}';
-          } else if (result.isLoading) {
-            _numberController.text = 'Is Loading...';
-          }
-
-          Map<String, dynamic>? repositories = result.data?['company'];
-
-          if (repositories == null) {
-            _numberController.text = 'No repositories';
-          } else {
+    return Expanded(
+      child: Container(
+        alignment: Alignment.center,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Color(0xff47A6DC),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: TextButton(
+          onPressed: () {
             setState(() {
-              _numberController.text = repositories['ceo'];
-              _descriptionController.text = repositories['coo'];
+              if (result.hasException) {
+                _resultList.add('Error: ${result.exception.toString()}');
+              } else if (result.isLoading) {
+                _resultList.add('Is Loading...');
+              } else if (result.data?[direction[0]] == null) {
+                _resultList.add('No repositories');
+              } else {
+                Map<String, dynamic> repositories = result.data?[direction[0]];
+
+                _numberController.text = repositories[list[0]];
+                _descriptionController.text = repositories[list[1]];
+                _materialAndColorController![0].text =
+                    repositories[list[2]].toString();
+                _quantityPerProductController![0].text =
+                    repositories[list[3]].toString();
+                _unitMeasurementController![0] = '1';
+                _furnitureAndColorController.text = repositories[list[5]];
+                _furnitureQuantityPerProductController.text =
+                    repositories[list[6]].toString();
+                _strFurnitureUnitMeasurement = 'material';
+                _resultList = [];
+                _resultList.add('Succesfully fetched data');
+              }
             });
-          }
-        },
-        child: Text(
-          'Fetch Data',
-          style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
+          },
+          child: const Text(
+            'Fetch Data',
+            style: TextStyle(color: Color(0xffFFFFFF), fontSize: 16),
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _result() {
+    return Column(
+      children: [
+        SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(border: Border.all(color: Colors.red)),
+          height: 100,
+          width: MediaQuery.of(context).size.width,
+          child: ListView.builder(
+              itemCount: _resultList.length,
+              itemBuilder: (context, index) {
+                return Text(
+                  _resultList[index],
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                  ),
+                );
+              }),
+        ),
+        SizedBox(height: 10),
+      ],
     );
   }
 }

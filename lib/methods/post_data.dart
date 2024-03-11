@@ -1,16 +1,23 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class PostData {
-  Future<void> postData1(var value1, var value2) async {
+  List<String> _res = [];
+
+  List<String> get getRes => _res;
+
+  void setResult() {
+    _res = [];
+  }
+
+  Future<void> postData1(String value1, String value2) async {
     Map<String, dynamic> data = {
-      'number': value1.text,
-      'description': value2.text,
+      'title': value1,
+      'body': value2,
     };
     try {
       final response = await http.post(
-        Uri.parse('https://intern.salamhalal.info/api/article/'),
+        Uri.parse('https://jsonplaceholder.typicode.com/posts'),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
@@ -18,21 +25,25 @@ class PostData {
       );
 
       if (response.statusCode == 201) {
-        print('Успешно отправлено(Информация об артикуле): ${response.body}');
+        _res.add('Успешно отправлено(Информация об артикуле)');
+        //print('Успешно отправлено(Информация об артикуле): ${response.body}');
       } else {
-        print('Ошибка(Информация об артикуле): ${response.statusCode}');
+        _res.add('Ошибка(Информация об артикуле): ${response.statusCode}');
+        //print('Ошибка(Информация об артикуле): ${response.statusCode}');
       }
     } catch (error) {
-      print('Ошибка при выполнении запроса(Информация об артикуле): $error');
+      _res.add('Ошибка при выполнении запроса(Информация об артикуле): $error');
+      //print('Ошибка при выполнении запроса(Информация об артикуле): $error');
     }
   }
 
-  Future<void> postData2(int index, var value1, var value2, var value3) async {
-    var url2 = 'https://intern.salamhalal.info/api/article_item/';
+  Future<void> postData2(
+      int index, String value1, String value2, var value3) async {
+    var url2 = 'https://jsonplaceholder.typicode.com/posts';
     Map<String, dynamic> data2 = {
-      'quantity': int.parse(value1![index].text),
-      'article': int.parse(value2![index].text),
-      'item': int.parse(value3![index] ?? '0'),
+      'userId': int.parse(value1[index]),
+      'title': value2[index],
+      'body': value3![index] ?? '0',
     };
 
     try {
@@ -45,23 +56,25 @@ class PostData {
       );
 
       if (response2.statusCode == 201) {
-        print('Успешно отправлено(Материал): ${response2.body}');
+        _res.add('Успешно отправлено(Материал)');
+        //print('Успешно отправлено(Материал): ${response2.body}');
       } else {
-        print('Ошибка(Материал): ${response2.statusCode}');
+        _res.add('Ошибка(Материал): ${response2.statusCode}');
+        //print('Ошибка(Материал): ${response2.statusCode}');
       }
     } catch (error) {
-      print('Ошибка при выполнении запроса(Материал): $error');
+      _res.add('Ошибка при выполнении запроса(Материал): $error');
+      //print('Ошибка при выполнении запроса(Материал): $error');
     }
   }
 
-  Future<void> postData3(TextEditingController value1, String? value2,
-      TextEditingController value3) async {
-    var url3 = 'https://intern.salamhalal.info/api/item/';
-// _furnitureAndColorController _strFurnitureUnitMeasurement _furnitureQuantityPerProductController
+  Future<void> postData3(String value1, String value2, String? value3) async {
+    var url3 = 'https://jsonplaceholder.typicode.com/posts';
+
     Map<String, dynamic> data3 = {
-      'name': value1.text,
-      'item_type': value2,
-      'measurement': int.parse(value3.text),
+      'title': value1,
+      'userId': int.parse(value2),
+      'body': value3,
     };
     try {
       final response3 = await http.post(
@@ -73,12 +86,15 @@ class PostData {
       );
 
       if (response3.statusCode == 201) {
-        print('Успешно отправлено(Фурнитура): ${response3.body}');
+        _res.add('Успешно отправлено(Фурнитура)');
+        //print('Успешно отправлено(Фурнитура): ${response3.body}');
       } else {
-        print('Ошибка(Фурнитура): ${response3.statusCode}');
+        _res.add('Ошибка(Фурнитура): ${response3.statusCode}');
+        //print('Ошибка(Фурнитура): ${response3.statusCode}');
       }
     } catch (error) {
-      print('Ошибка при выполнении запроса(Фурнитура): $error');
+      _res.add('Ошибка при выполнении запроса(Фурнитура): $error');
+      //print('Ошибка при выполнении запроса(Фурнитура): $error');
     }
   }
 }
